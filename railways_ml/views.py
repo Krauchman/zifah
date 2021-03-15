@@ -20,44 +20,47 @@ class RunML(APIView):
 
     def post(self, request):
 
-        dates = []
-        carClasses = []
-        trainNumbers = []
-        stations = []
-        indexNumbers = []
-
         response_data = copy.deepcopy(request.data)
         data = request.data
         data['wagons'] = self.mergeCarClasses(data.get('wagons', []))
 
-        for i, station in enumerate(data.get('stations', [])):
-            if i == len(data.get('stations', [])) - 1:
-                break
-            for wagon in data.get('wagons', []):
+        counts = []
+        ticketsSolds = []
+
+        for wagon in data.get('wagons', []):
+            dates = []
+            carClasses = []
+            trainNumbers = []
+            stations = []
+            indexNumbers = []
+
+            for i, station in enumerate(data.get('stations', [])):
+                if i == len(data.get('stations', [])) - 1:
+                    break
                 dates.append(data.get('date', datetime.date.today().isoformat()))
                 carClasses.append(wagon.get('carClass', '2Д'))
                 trainNumbers.append(data.get('trainNumber', '031Х'))
                 stations.append(station.strip())
                 indexNumbers.append(i + 1)
 
-        result = runML(
-            dates,
-            carClasses,
-            trainNumbers,
-            stations,
-            indexNumbers,
-        )
+            result = runML(
+                dates,
+                carClasses,
+                trainNumbers,
+                stations,
+                indexNumbers,
+            )
 
-        counts = result['Count'].astype(int)
-        ticketsSolds = result['TicketsSold'].astype(int)
+            counts.extend(result['Count'].astype(int))
+            ticketsSolds.extend(result['TicketsSold'].astype(int))
 
         response_data['predictions'] = []
 
         current = 0
-        for i, station in enumerate(data.get('stations', [])):
-            if i == len(data.get('stations', [])) - 1:
-                break
-            for wagon in data.get('wagons', []):
+        for wagon in data.get('wagons', []):
+            for i, station in enumerate(data.get('stations', [])):
+                if i == len(data.get('stations', [])) - 1:
+                    break
                 prediction = copy.deepcopy(wagon)
                 prediction['count'] = counts[current]
                 prediction['ticketsSold'] = ticketsSolds[current]
