@@ -36,7 +36,7 @@ def runML(date, carClass, trainNumber, stationName, indexNumber):
             data[col] = np.zeros(len(date))
 
     for idx, carCls in enumerate(carClass):
-        data.iloc[idx][carCls] = 1
+        data.iloc[idx, data.columns.get_loc(carCls)] = 1
 
     preds = {}
     preds['TicketsSold'] = np.maximum(np.zeros(len(data)), ticket_reg.predict(data))
