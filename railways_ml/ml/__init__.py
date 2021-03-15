@@ -39,8 +39,9 @@ def runML(date, carClass, trainNumber, stationName, indexNumber):
         data.iloc[idx][carCls] = 1
 
     preds = {}
-    preds['Count'] = np.maximum(np.zeros(len(data)), count_reg.predict(data))
     preds['TicketsSold'] = np.maximum(np.zeros(len(data)), ticket_reg.predict(data))
+    data['TicketsSold'] = preds['TicketsSold']
+    preds['Count'] = np.maximum(np.zeros(len(data)), count_reg.predict(data))
     preds['TicketsSold'] = np.maximum(preds['TicketsSold'], preds['Count'])
     for i in range(1, len(preds['TicketsSold'])):
         preds['TicketsSold'][i] = max(preds['TicketsSold'][i], preds['TicketsSold'][i - 1])
